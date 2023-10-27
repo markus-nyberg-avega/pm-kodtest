@@ -20,21 +20,28 @@ public class BookController {
 
 
   @GetMapping("/orderBy/{orderBy}")
-  public List<Book> allOrderBy(@PathVariable String orderBy) {
+  public List<BookDto> allOrderBy(@PathVariable String orderBy) {
     return OrderBy.of(orderBy)
-            .map(bookService::allOrderBy)
-            .orElseThrow(() -> new OrderByException(orderBy));
+                  .map(bookService::allOrderBy)
+                  .map(bookList -> bookList.stream().map(BookDto::fromBook).toList())
+                  .orElseThrow(() -> new OrderByException(orderBy));
   }
 
   @GetMapping("/author/{author}")
-  public List<Book> byAuthor(@PathVariable String author) {
-    return bookService.findAllByAuthorContaining(author);
+  public List<BookDto> byAuthor(@PathVariable String author) {
+    return bookService.findAllByAuthorContaining(author)
+                      .stream()
+                      .map(BookDto::fromBook)
+                      .toList();
   }
 
 
   @GetMapping("/title/{title}")
-  public List<Book> byTitle(@PathVariable String title) {
-    return bookService.findAllByTitleContaining(title);
+  public List<BookDto> byTitle(@PathVariable String title) {
+    return bookService.findAllByTitleContaining(title)
+                      .stream()
+                      .map(BookDto::fromBook)
+                      .toList();
   }
 
 }

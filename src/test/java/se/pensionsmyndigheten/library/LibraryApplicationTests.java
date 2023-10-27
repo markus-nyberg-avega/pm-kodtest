@@ -2,6 +2,7 @@ package se.pensionsmyndigheten.library;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import se.pensionsmyndigheten.library.book.Book;
-import se.pensionsmyndigheten.library.customer.Customer;
+import se.pensionsmyndigheten.library.book.BookDto;
+import se.pensionsmyndigheten.library.customer.CustomerDto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -41,7 +42,7 @@ class LibraryApplicationTests {
                               .andExpect(status().isOk())
                               .andReturn();
 
-    List<Book> actual = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+    List<BookDto> actual = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
 
     assertThat(actual).hasSize(2);
   }
@@ -53,7 +54,7 @@ class LibraryApplicationTests {
                               .andExpect(status().isOk())
                               .andReturn();
 
-    List<Book> actual = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
+    List<BookDto> actual = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<>() {});
 
     assertThat(actual).hasSize(1);
   }
@@ -73,9 +74,9 @@ class LibraryApplicationTests {
                               .andExpect(status().isOk())
                               .andReturn();
 
-    List<Book> actual = objectMapper.readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {});
+    List<BookDto> actual = objectMapper.readValue(result.getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {});
 
-    assertThat(actual).extracting(Book::getTitle).containsExactly(
+    assertThat(actual).extracting(BookDto::getTitle).containsExactly(
             "En komikers uppväxt",
             "En man som heter Ove",
             "En väktares bekännelser",
@@ -136,7 +137,7 @@ class LibraryApplicationTests {
             .andExpect(status().isOk())
             .andReturn();
 
-    Customer foundCustomer = objectMapper.readValue(findResult.getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {});
+    CustomerDto foundCustomer = objectMapper.readValue(findResult.getResponse().getContentAsString(StandardCharsets.UTF_8), new TypeReference<>() {});
 
     // Then
     assertThat(foundCustomer.getUuid()).isEqualTo(customer.getUuid());
@@ -241,12 +242,34 @@ class LibraryApplicationTests {
   }
 
 
+  @DisplayName(
+          """
+          Given a customer with uuid X
+          When inserting customer with uuid x
+          Then return exception
+          """)
+  @Test
+  @Disabled("Not finished")
+  void canNotInsertCustomerWithSameUuid() throws Exception {
+    // Lend book
+    var customer = createCustomer();
+    mockMvc
+            .perform(post("/customer")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(customer)));
 
-  private static Customer createCustomer() {
-    var customer = new Customer();
-    customer.setUuid(UUID.randomUUID());
-    customer.setLastname("Svensson");
-    customer.setFirstname("Sven");
-    return customer;
+    mockMvc
+            .perform(post("/customer")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(customer)))
+            .andExpect(status().isInternalServerError());
+  }
+
+
+  private static CustomerDto createCustomer() {
+    return new CustomerDto(
+            UUID.randomUUID(),
+            "Sven",
+            "Svensson");
   }
 }

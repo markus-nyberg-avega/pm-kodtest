@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -26,21 +27,30 @@ public class CustomerController {
     }
 
     @GetMapping
-    public List<Customer> findAll() {
+    public List<CustomerDto> findAll() {
         return StreamSupport.stream(service.findAll().spliterator(), false)
+                            .map(CustomerDto::fromCustomer)
                             .toList();
     }
 
     @GetMapping("/{id}")
-    public Customer findById(@PathVariable String id) {
+    public CustomerDto findById(@PathVariable String id) {
         return service.findByUUid(parseUuid(id))
+                      .map(CustomerDto::fromCustomer)
                       .orElseThrow(CustomerNotFoundException::new);
     }
 
     @PostMapping
     @ResponseStatus(value = HttpStatus.CREATED)
-    public Customer insert(@RequestBody Customer customer) {
-        return service.save(customer);
+    public CustomerDto insert(@RequestBody CustomerDto customerDto) {
+        Customer customer = service.save(customerDto.toCustomer());
+        return CustomerDto.fromCustomer(customer);
+    }
+
+    @PutMapping
+    public CustomerDto update(@RequestBody CustomerDto customerDto) {
+        var customer = service.findByUUid(customerDto.getUuid());
+        throw new UnsupportedOperationException();
     }
 
     @DeleteMapping("/{uuid}")
