@@ -49,17 +49,17 @@ public class CustomerController {
                .ifPresent(service::delete);
     }
 
-    @GetMapping("/{customerId}/reserve/{isbn}")
-    public boolean reserve(@PathVariable String customerId, @PathVariable String isbn) {
+    @GetMapping("/{customerId}/borrow/{isbn}")
+    public boolean borrowBook(@PathVariable String customerId, @PathVariable String isbn) {
         var cid = parseUuid(customerId);
-        return service.reserve(cid, isbn);
+        return service.borrow(cid, isbn);
     }
 
 
-    @GetMapping("/{customerId}/unreserve/{isbn}")
-    public boolean unreserve(@PathVariable String customerId, @PathVariable String isbn) {
+    @GetMapping("/{customerId}/return/{isbn}")
+    public boolean returnBook(@PathVariable String customerId, @PathVariable String isbn) {
         var cid = parseUuid(customerId);
-        return service.unreserve(cid, isbn);
+        return service.returnBook(cid, isbn);
     }
 
     private UUID parseUuid(String uuid) throws UuidException {

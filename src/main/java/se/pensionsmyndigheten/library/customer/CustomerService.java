@@ -41,23 +41,29 @@ public class CustomerService {
         return Optional.ofNullable(customer);
     }
 
-    public boolean reserve(UUID customerID, String isbn) {
+    public boolean borrow(UUID customerID, String isbn) {
         return findByUUid(customerID)
-                .map(customer -> reserve(customer, isbn))
+                .map(customer -> borrow(customer, isbn))
                 .orElse(false);
     }
 
-    private boolean reserve(
+    private boolean borrow(
             final Customer customer,
             final String isbn
     ) {
         List<Book> books = bookRepository.findAllByIsbn(isbn);
-        if (books.isEmpty() || hasAlreadyBeenReserve(customer, books)) {
+        if (books.isEmpty()
+                || hasAlreadyBeenReserve(customer, books)
+                || hasReachedMaxNumberOfBorrowedBooks(customer)) {
             return false;
         }
         customer.getBooks().addAll(books);
         customerRepository.save(customer);
         return true;
+    }
+
+    private static boolean hasReachedMaxNumberOfBorrowedBooks(final Customer customer) {
+        return customer.getBooks().size() >= 2;
     }
 
     private static boolean hasAlreadyBeenReserve(
@@ -67,13 +73,13 @@ public class CustomerService {
         return new HashSet<>(customer.getBooks()).containsAll(books);
     }
 
-    public boolean unreserve(UUID customerID, String isbn) {
+    public boolean returnBook(UUID customerID, String isbn) {
         return findByUUid(customerID)
-                .map(customer -> unreserve(customer, isbn))
+                .map(customer -> returnBook(customer, isbn))
                 .orElse(false);
     }
 
-    private boolean unreserve(
+    private boolean returnBook(
             final Customer customer,
             final String isbn
     ) {

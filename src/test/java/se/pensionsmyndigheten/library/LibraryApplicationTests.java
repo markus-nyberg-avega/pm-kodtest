@@ -195,6 +195,53 @@ class LibraryApplicationTests {
     assertThat(errorMsg).isEqualTo("Invalid UUID, invalidUuid");
   }
 
+  @DisplayName(
+          """
+          Given book X is borrowed
+          When  book is returned
+          Then return true
+          """)
+  @Test
+  void returnBook() throws Exception {
+    // Lend book
+    mockMvc
+            .perform(get("/customer/22d073e4-8b1a-4378-adb8-761e38bf471b/borrow/9789187707469"))
+            .andExpect(status().isOk());
+
+    // Return book
+    var result = mockMvc
+            .perform(get("/customer/22d073e4-8b1a-4378-adb8-761e38bf471b/return/9789187707469"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String resultMsg = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+    // Then
+    assertThat(resultMsg).isEqualTo("true");
+  }
+
+  @DisplayName(
+          """
+          Given book X
+          When book X is borrowed
+          Then return true
+          """)
+  @Test
+  void borrowBook() throws Exception {
+    // Lend book
+    var result = mockMvc
+            .perform(get("/customer/22d073e4-8b1a-4378-adb8-761e38bf471b/borrow/9789187707469"))
+            .andExpect(status().isOk())
+            .andReturn();
+
+    String resultMsg = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+
+    // Then
+    assertThat(resultMsg).isEqualTo("true");
+  }
+
+
+
   private static Customer createCustomer() {
     var customer = new Customer();
     customer.setUuid(UUID.randomUUID());
