@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping(path = "/customer")
@@ -28,9 +27,9 @@ public class CustomerController {
 
     @GetMapping
     public List<CustomerDto> findAll() {
-        return StreamSupport.stream(service.findAll().spliterator(), false)
-                            .map(CustomerDto::fromCustomer)
-                            .toList();
+        return service.findAll().stream()
+                      .map(CustomerDto::fromCustomer)
+                      .toList();
     }
 
     @GetMapping("/{id}")

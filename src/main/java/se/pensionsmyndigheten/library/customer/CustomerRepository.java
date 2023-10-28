@@ -1,10 +1,10 @@
 package se.pensionsmyndigheten.library.customer;
 
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.ListCrudRepository;
 
 import java.util.UUID;
 
-public interface CustomerRepository extends CrudRepository<Customer, Integer> {
+public interface CustomerRepository extends ListCrudRepository<Customer, Integer> {
 
     Customer findByUuid(UUID uuid);
 }
